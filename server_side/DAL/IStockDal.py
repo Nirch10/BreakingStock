@@ -21,6 +21,10 @@ class IStockDal(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def update_stock_availability(self, stock: Stock, availability: bool) -> None:
+        pass
+
+    @abc.abstractmethod
     def get_stock_profit_money(self, stock: Stock) -> float:
         pass
 
