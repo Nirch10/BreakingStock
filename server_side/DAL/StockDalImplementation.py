@@ -27,9 +27,8 @@ class RedisStockDal(IStockDal):
             return {}
         return results
 
-    def delete_stock(self, stock: Stock) -> None:
-        for key in self.redis.scan_iter(stock):
-            self.redis.delete(key)
+    def delete_stock(self, stock_id: str) -> None:
+        self.redis.delete(str.encode(stock_id))
 
     def update_stock_availability(self, stock: Stock, availability: bool) -> None:
         stock.set_availability(availability)

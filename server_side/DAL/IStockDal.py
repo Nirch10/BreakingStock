@@ -17,7 +17,7 @@ class IStockDal(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def delete_stock(self, stock: Stock) -> None:
+    def delete_stock(self, stock_id: str) -> None:
         pass
 
     @abc.abstractmethod

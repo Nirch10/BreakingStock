@@ -22,4 +22,10 @@ class RedisDalTests(unittest.TestCase):
         first = self.dal.get_stock(next(iter(all)))
         print(first)
 
+    def test_delete_stock(self):
+        all = self.dal.get_stocks()
+        self.dal.delete_stock(next(iter(all)))
+        all = self.dal.get_stocks()
+        print("dom")
+
 
