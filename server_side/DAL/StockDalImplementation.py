@@ -11,12 +11,21 @@ class RedisStockDal(IStockDal):
         self.redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db, password=password)
 
     def get_stock(self, stock_id: str) -> Stock:
-        stock = self.redis.get(stock_id)
+        stock = self.redis.get(str.encode(stock_id))
+        stock = self.__parse_json_stock(json.loads(stock))
         return stock
 
-    def get_stocks(self) -> list:
-        _, keys = self.redis.scan("*")
-        return self.redis.mget(keys)
+    def get_stocks(self) -> dict:
+        keys = self.redis.keys('*')
+        results = {}
+        try:
+            for key in keys:
+                json_stock = json.loads(self.redis.get(key))
+                stock = self.__parse_json_stock(json_stock)
+                results[key.decode()] = stock
+        except Exception:
+            return {}
+        return results
 
     def delete_stock(self, stock: Stock) -> None:
         for key in self.redis.scan_iter(stock):
@@ -43,6 +52,13 @@ class RedisStockDal(IStockDal):
         for key in self.redis.scan_iter(stock):
             self.redis.set(key, stock)
         return tuple(current_sum, cost_sum)
+
+    def __parse_json_stock(self, json_stock: str) -> Stock:
+        try:
+            stock = Stock(stock_name=json_stock['name'], stock_cost=json_stock['cost'], stock_curr_price=json_stock['curr_price'], available=json_stock['available'])
+            return stock
+        except Exception:
+            return None
 
 class CsvStockDal(IStockDal):
     def add_stock(self, stock: Stock) -> None:

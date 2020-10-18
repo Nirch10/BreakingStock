@@ -1,7 +1,6 @@
 class Stock:
     def __init__(self, stock_name: str, stock_curr_price: float = 0.0, stock_cost: float = 0.0,
                  available: bool = True) -> None:
-        self.id = 0
         self.name = stock_name
         self.curr_price = stock_curr_price
         self.cost = stock_cost
