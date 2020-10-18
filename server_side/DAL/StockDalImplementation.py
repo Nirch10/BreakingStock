@@ -7,6 +7,7 @@ from Models.Stock import Stock
 
 
 class RedisStockDal(IStockDal):
+
     def __init__(self, redis_host: str, redis_port: int, password: str = '', redis_db: int = 0):
         self.redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db, password=password)
 
@@ -30,27 +31,32 @@ class RedisStockDal(IStockDal):
     def delete_stock(self, stock_id: str) -> None:
         self.redis.delete(str.encode(stock_id))
 
-    def update_stock_availability(self, stock: Stock, availability: bool) -> None:
+    def update_stock_availability(self, stock_id: str, availability: bool) -> None:
+        stock = self.get_stock(stock_id)
         stock.set_availability(availability)
-        for key in self.redis.scan_iter(stock):
-            self.redis.set(key, stock)
+        self.redis.set(str.encode(stock_id), json.dumps(stock.__dict__))
 
-    def get_stock_profit_money(self, stock: Stock) -> float:
-        curr_price, cost = self.__get_current_price_and_init_cost(stock)
+    def update_current_price(self, stock_id: str, current_price: float) -> None:
+        stock = self.get_stock(stock_id)
+        stock.set_curr_price(current_price)
+        self.redis.set(str.encode(stock_id), json.dumps(stock.__dict__))
+
+    def get_stock_profit_money(self, stock_id: str) -> float:
+        curr_price, cost = self.__get_current_price_and_init_cost(stock_id)
         return curr_price - cost
 
-    def get_stock_profit_percentage(self, stock: Stock) -> float:
-        curr_price, cost = self.__get_current_price_and_init_cost(stock)
+    def get_stock_profit_percentage(self, stock_id: Stock) -> float:
+        curr_price, cost = self.__get_current_price_and_init_cost(stock_id)
         return (curr_price * 100) / cost
 
     def add_stock(self, stock: Stock) -> None:
         self.redis.set(str(uuid.uuid4()), json.dumps(stock.__dict__))
 
-    def __get_current_price_and_init_cost(self, stock: Stock) -> tuple:
-        current_sum, cost_sum = 0
-        for key in self.redis.scan_iter(stock):
-            self.redis.set(key, stock)
-        return tuple(current_sum, cost_sum)
+    def __get_current_price_and_init_cost(self, stock_id: str) -> tuple:
+        stock = self.get_stock(stock_id)
+        current_sum = stock.get_curr_price()
+        cost_sum = stock.get_cost()
+        return current_sum, cost_sum
 
     def __parse_json_stock(self, json_stock: str) -> Stock:
         try:

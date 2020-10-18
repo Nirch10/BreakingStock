@@ -28,4 +28,31 @@ class RedisDalTests(unittest.TestCase):
         all = self.dal.get_stocks()
         print("dom")
 
+    def test_update_availability(self):
+        all = self.dal.get_stocks()
+        self.dal.update_stock_availability(next(iter(all)), False)
+        all = self.dal.get_stocks()
+        print("dom")
+
+    def test_update_current_price(self):
+        all = self.dal.get_stocks()
+        self.dal.update_current_price(next(iter(all)), 1.7)
+        all = self.dal.get_stocks()
+        print("dom")
+
+    def test_get_current_profit(self):
+        all = self.dal.get_stocks()
+        for v in all:
+            profit = self.dal.get_stock_profit_money(v)
+            print(profit)
+
+    def test_get_current_profit_percentage(self):
+        all = self.dal.get_stocks()
+        for v in all:
+            profit = self.dal.get_stock_profit_percentage(v)
+            print(str(profit - 100.0) + '%')
+        print()
+
+
+
 
