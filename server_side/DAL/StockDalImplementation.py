@@ -1,5 +1,5 @@
 import uuid
-
+import json
 import redis as redis
 
 from DAL.IStockDal import IStockDal
@@ -7,7 +7,7 @@ from Models.Stock import Stock
 
 
 class RedisStockDal(IStockDal):
-    def __init__(self, redis_host: str, redis_port: int, password: str, redis_db: int):
+    def __init__(self, redis_host: str, redis_port: int, password: str = '', redis_db: int = 0):
         self.redis = redis.Redis(host=redis_host, port=redis_port, db=redis_db, password=password)
 
     def get_stock(self, stock_id: str) -> Stock:
@@ -36,7 +36,7 @@ class RedisStockDal(IStockDal):
         return (curr_price * 100) / cost
 
     def add_stock(self, stock: Stock) -> None:
-        self.redis.set(str(uuid.uuid4()), stock)
+        self.redis.set(str(uuid.uuid4()), json.dumps(stock.__dict__))
 
     def __get_current_price_and_init_cost(self, stock: Stock) -> tuple:
         current_sum, cost_sum = 0
